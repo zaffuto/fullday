@@ -1,8 +1,8 @@
-import type { NextAuthConfig } from 'next-auth';
+import { NextAuthConfig } from 'next-auth';
 import Credentials from 'next-auth/providers/credentials';
 import { z } from 'zod';
 import { sql } from '@vercel/postgres';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 
 export const authConfig = {
   pages: {

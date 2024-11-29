@@ -1,4 +1,4 @@
-import { QRGenerator } from '@/components/QRGenerator';
+import { QRGenerator } from '@/components/qr/QRGenerator';
 
 export default function QRPage() {
   return (

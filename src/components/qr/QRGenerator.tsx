@@ -2,8 +2,9 @@
 
 import { useState, useRef, ChangeEvent } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
-import { Download, Link as LinkIcon, Upload, Trash2 } from 'lucide-react';
+import { Download, Link as LinkIcon, Upload, Trash2, Save } from 'lucide-react';
 import { ColorPicker } from '../ColorPicker';
+import { useToast } from '@/hooks/useToast';
 
 export function QRGenerator() {
   const [url, setUrl] = useState('');
@@ -14,7 +15,9 @@ export function QRGenerator() {
   const [logo, setLogo] = useState<string | null>(null);
   const [qrStyle, setQrStyle] = useState<'dots' | 'squares'>('squares');
   const [errorLevel, setErrorLevel] = useState<'L' | 'M' | 'Q' | 'H'>('H');
+  const [isLoading, setIsLoading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { toast } = useToast();
 
   const handleLogoUpload = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -56,6 +59,55 @@ export function QRGenerator() {
     };
 
     img.src = 'data:image/svg+xml;base64,' + btoa(svgData);
+  };
+
+  const handleSave = async () => {
+    if (!url) {
+      toast({
+        title: "Error",
+        description: "Por favor, ingresa una URL válida",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      const response = await fetch('/api/qr', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          url,
+          description,
+          size,
+          fgColor,
+          bgColor,
+          qrStyle,
+          errorLevel,
+          logo,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Error al guardar el QR');
+      }
+
+      toast({
+        title: "¡Éxito!",
+        description: "El código QR se ha guardado correctamente",
+      });
+    } catch (error) {
+      console.error('Error al guardar:', error);
+      toast({
+        title: "Error",
+        description: "No se pudo guardar el código QR",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -243,6 +295,15 @@ export function QRGenerator() {
             </div>
 
             <div className="flex justify-center space-x-4">
+              <button
+                type="button"
+                disabled={!url || isLoading}
+                onClick={handleSave}
+                className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50 transition-colors duration-200"
+              >
+                <Save className="h-5 w-5 mr-2" />
+                {isLoading ? 'Guardando...' : 'Guardar QR'}
+              </button>
               <button
                 type="button"
                 disabled={!url}

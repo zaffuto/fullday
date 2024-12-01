@@ -33,19 +33,18 @@ model User {
 
 model QRCode {
   id          String   @id @default(cuid())
-  title       String
+  url         String
   description String?
-  imageUrl    String?
-  qrUrl       String
-  userId      String
-  user        User     @relation(fields: [userId], references: [id])
-  type        String   @default("BASIC")
-  status      String   @default("ACTIVE")
-  clicks      Int      @default(0)
+  size        Int      @default(200)
+  fgColor     String   @default("#000000")
+  bgColor     String   @default("#FFFFFF")
+  qrStyle     String   @default("squares")
+  errorLevel  String   @default("H")
+  logo        String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-
-  @@index([userId])
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
 }
 
 model VerificationToken {
